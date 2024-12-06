@@ -1,0 +1,9 @@
+requests
+beautifulsoup4
+pandas
+nltk
+spacy
+transformers
+flask
+gunicorn
+boto
