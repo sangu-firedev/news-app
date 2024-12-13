@@ -29,21 +29,22 @@ def fetch_article_content(og_url):
         article = Article(og_url)
         article.download()
         article.parse()
-        return article.publish_date, article.text
+        return article.text
     except Exception as e:
         print(f"Error fetching article content: {e}")
         return None, None
 
-def process_single_article(sub_art, topic):
+def process_single_article(sub_art, topic, datetime_published):
     """processing single article and grouping them according to their respective topics"""
     try:
         url = sub_art['url']
         og_url = get_og_link(url)
         if og_url:
-            publish_date, article_text = fetch_article_content(og_url)
+            #publish_date, article_text = fetch_article_content(og_url)
+            article_text = fetch_article_content(og_url)
             if article_text:
                 sub_art['topic'] = topic 
-                sub_art['published'] = publish_date
+                sub_art['published'] = datetime_published 
                 sub_art['article'] = article_text
                 return sub_art
         print(f'Failed to decode or retrieve article at URL: {url}')
@@ -59,12 +60,13 @@ def extract_news(entries, threads):
     sub_articles = []
     for article in entries:
         topic = article.get('title', 'Unknown')
+        datetime_published = article.get('published', 'Unknown')
         for sub_art in article.get('sub_articles', []):
-            sub_articles.append((sub_art, topic))
+            sub_articles.append((sub_art, topic, datetime_published))
 
     # Use ThreadPoolExecutor for multi-threading
     with ThreadPoolExecutor(max_workers=threads) as executor: # Adjust max_workers as per your requirement
-        futures = {executor.submit(process_single_article, sub_art, topic) : sub_art for sub_art, topic in sub_articles} 
+        futures = {executor.submit(process_single_article, sub_art, topic, datetime_published) : sub_art for sub_art, topic, datetime_published in sub_articles} 
         # Collect the results as they complete
         for future in tqdm(as_completed(futures), desc="Extracting Articles", total=len(sub_articles)):
             result = future.result()
