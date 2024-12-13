@@ -4,7 +4,8 @@ import urllib
 from dateparser import parse as parse_date
 import requests
 
-
+# code credits : https://github.com/kotartemiy/pygooglenews
+# The official package is broken so copied the code here.
 
 class GoogleNews:
     def __init__(self, lang = 'en', country = 'US'):
