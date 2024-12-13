@@ -51,7 +51,7 @@ def process_single_article(sub_art, topic):
         print(f'Error in process_single_article: {e}')
     return None
 
-def extract_news(entries):
+def extract_news(entries, threads):
     """Extracting articles concurrently while keeping them grouped by thier topic"""
     articles_data = {}
 
@@ -63,7 +63,7 @@ def extract_news(entries):
             sub_articles.append((sub_art, topic))
 
     # Use ThreadPoolExecutor for multi-threading
-    with ThreadPoolExecutor(max_workers=10) as executor: # Adjust max_workers as per your requirement
+    with ThreadPoolExecutor(max_workers=threads) as executor: # Adjust max_workers as per your requirement
         futures = {executor.submit(process_single_article, sub_art, topic) : sub_art for sub_art, topic in sub_articles} 
         # Collect the results as they complete
         for future in tqdm(as_completed(futures), desc="Extracting Articles", total=len(sub_articles)):
@@ -76,11 +76,11 @@ def extract_news(entries):
     
     return articles_data
 
-def get_top_news(country:str, country_code:str) :
+def get_top_news(country:str, country_code:str, threads=10) :
     """Retrieve and decode top news articles for a specific country."""
     gn = GoogleNews(country=country_code)
     top_news = gn.geo_headlines(country)
     entries = top_news['entries']
 
-    articles = extract_news(entries)
+    articles = extract_news(entries, threads)
     return articles
