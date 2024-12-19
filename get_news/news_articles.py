@@ -9,6 +9,7 @@ from google_news import GoogleNews
 from googlenewsdecoder import new_decoderv1 
 from newspaper import Article
 from concurrent.futures import ThreadPoolExecutor, as_completed
+#from schemas.llm_input import sub_article_check
 
 def get_og_link(source_url, interval=5):
     """Decode the original link from the source URL."""
@@ -32,7 +33,7 @@ def fetch_article_content(og_url):
         return article.text
     except Exception as e:
         print(f"Error fetching article content: {e}")
-        return None, None
+        return None
 
 def process_single_article(sub_art, topic, datetime_published):
     """processing single article and grouping them according to their respective topics"""
@@ -47,6 +48,7 @@ def process_single_article(sub_art, topic, datetime_published):
                 sub_art['published'] = datetime_published 
                 sub_art['article'] = article_text
                 return sub_art
+                #sub_art = sub_article_check(**sub_art) # data validation using pydantic
         print(f'Failed to decode or retrieve article at URL: {url}')
     except Exception as e:
         print(f'Error in process_single_article: {e}')
